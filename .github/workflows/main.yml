@@ -1,0 +1,20 @@
+name: All builds
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version:
+          - "1.19"
+          - "1.20"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3.2.0
+        with:
+          go-version: ${{ matrix.go_version }}
+      - run: expr $(gofmt -l .|wc -l) = 0 >/dev/null || (go fmt -d . && exit 1)
+      - run: go vet ./...
+      - run: go test -v -race ./...
